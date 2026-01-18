@@ -328,14 +328,14 @@ export class UserService {
 
   async create(dto: CreateUserDto) {
     const user = await this.repository.save(dto);
-    this.eventEmitter.emit("user.created", { userId: user.id });
+    this.eventEmitter.emit('user.created', { userId: user.id });
     return user;
   }
 }
 
 @Injectable()
 export class EmailHandler {
-  @OnEvent("user.created")
+  @OnEvent('user.created')
   async handleUserCreated(payload: { userId: string }) {
     // Send welcome email
   }
@@ -448,11 +448,11 @@ export interface IEmailService {
 
 ```typescript
 // libs/user/src/index.ts - Public API
-export { UserModule } from "./user.module";
-export { UserService } from "./application/services/user.service";
-export { CreateUserDto, UpdateUserDto } from "./application/dtos";
-export { User } from "./domain/entities/user.entity";
-export { IUserRepository } from "./domain/interfaces/user-repository.interface";
+export { UserModule } from './user.module';
+export { UserService } from './application/services/user.service';
+export { CreateUserDto, UpdateUserDto } from './application/dtos';
+export { User } from './domain/entities/user.entity';
+export { IUserRepository } from './domain/interfaces/user-repository.interface';
 
 // Don't export internal implementation details
 // ❌ Don't export: repositories, internal utilities
@@ -462,7 +462,7 @@ export { IUserRepository } from "./domain/interfaces/user-repository.interface";
 
 ```typescript
 // ✅ GOOD: Use class-validator for DTOs
-import { IsEmail, IsString, MinLength } from "class-validator";
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -525,7 +525,7 @@ export class AppConfig {
   constructor(private configService: ConfigService) {}
 
   get databaseUrl(): string {
-    return this.configService.getOrThrow<string>("DATABASE_URL");
+    return this.configService.getOrThrow<string>('DATABASE_URL');
   }
 }
 ```
@@ -571,7 +571,7 @@ export class TypeOrmUserRepository implements IUserRepository {
 - Location: `*.spec.ts` next to source files
 
 ```typescript
-describe("UserService", () => {
+describe('UserService', () => {
   let service: UserService;
   let repository: jest.Mocked<IUserRepository>;
 
@@ -584,13 +584,13 @@ describe("UserService", () => {
     service = new UserService(repository);
   });
 
-  it("should create a user", async () => {
-    const dto = { email: "test@example.com", password: "password123" };
-    repository.save.mockResolvedValue({ id: "1", ...dto });
+  it('should create a user', async () => {
+    const dto = { email: 'test@example.com', password: 'password123' };
+    repository.save.mockResolvedValue({ id: '1', ...dto });
 
     const result = await service.create(dto);
 
-    expect(result.id).toBe("1");
+    expect(result.id).toBe('1');
     expect(repository.save).toHaveBeenCalledWith(expect.objectContaining(dto));
   });
 });
@@ -608,7 +608,7 @@ describe("UserService", () => {
 - Location: `apps/*/test/`
 
 ```typescript
-describe("UserController (e2e)", () => {
+describe('UserController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -620,8 +620,11 @@ describe("UserController (e2e)", () => {
     await app.init();
   });
 
-  it("/users (POST)", () => {
-    return request(app.getHttpServer()).post("/users").send({ email: "test@example.com", password: "password123" }).expect(201);
+  it('/users (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({ email: 'test@example.com', password: 'password123' })
+      .expect(201);
   });
 });
 ```
@@ -684,9 +687,47 @@ mkdir -p libs/product/src/{entities,dtos,services}
 
 ---
 
+## ConfigModule
+
+### Usage example in a service or controller:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from './config/app.config';
+
+@Injectable()
+export class SomeService {
+  constructor(private configService: ConfigService) {}
+
+  getAppInfo() {
+    const appConfig = this.configService.get<AppConfig>('app');
+    return {
+      name: appConfig.name,
+      environment: appConfig.env,
+    };
+  }
+}
+```
+
+### Usage example in a main.ts:
+
+```typescript
+// Get config & app service
+const configService = app.get(ConfigService);
+const appConfig = configService.get<AppConfig>('app');
+
+// Set global API prefix
+app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
+```
+
 ## Additional Resources
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [TypeORM Documentation](https://typeorm.io/)
 - [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
 - [NestJS Best Practices](https://docs.nestjs.com/fundamentals/testing)
+
+```
+
+```
