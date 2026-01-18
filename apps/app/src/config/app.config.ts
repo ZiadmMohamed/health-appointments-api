@@ -1,21 +1,24 @@
 import { registerAs } from '@nestjs/config';
+import { CommonConfig } from './common.config';
 
 export interface AppConfig {
   name: string;
   env: string;
   port: number;
   apiPrefix: string;
-  apiVersion: string;
-  corsOrigin?: string;
+  apiVersion?: string;
 }
 
-export default registerAs('app', (): AppConfig => {
-  return {
-    name: 'Healthy',
-    env: process.env.NODE_ENV || 'development',
-    port: parseInt(process.env.PORT || '3000', 10),
-    apiPrefix: process.env.API_PREFIX || 'api',
-    apiVersion: process.env.API_VERSION || 'v1',
-    corsOrigin: process.env.CORS_ORIGIN || '*',
-  };
-});
+class AppConfigClass extends CommonConfig {
+  load(): AppConfig {
+    return {
+      name: this.getEnvString('APP_NAME', 'Healthy'),
+      env: this.getEnvString('NODE_ENV', 'development'),
+      port: this.getEnvNumber('PORT', 3000),
+      apiPrefix: this.getEnvString('API_PREFIX', 'api'),
+      apiVersion: this.getEnvString('API_VERSION', 'v1'),
+    };
+  }
+}
+
+export default registerAs('app', () => new AppConfigClass().load());
