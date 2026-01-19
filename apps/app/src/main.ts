@@ -21,7 +21,7 @@ async function bootstrap() {
       app,
       swaggerConfigApp(),
     );
-    SwaggerModule.setup('docs', app, documentBuilder);
+    SwaggerModule.setup('api', app, documentBuilder);
   }
 
   // Start server
