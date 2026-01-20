@@ -9,9 +9,16 @@
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/health-appointments-api/main",
+    "admin:build": "nest build admin",
+    "admin:start": "nest start admin",
+    "admin:start:debug": "nest start admin --debug --watch",
+    "admin:start:dev": "nest start admin --watch",
+    "admin:start:prod": "node dist/apps/admin/main",
+    "app:build": "nest build app",
+    "app:start": "nest start app",
+    "app:start:debug": "nest start app --debug --watch",
+    "app:start:dev": "nest start app --watch",
+    "app:start:prod": "node dist/apps/app/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -24,13 +31,19 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+<<<<<<< HEAD
     "@nestjs/swagger": "^11.2.5",
+=======
+>>>>>>> origin/main
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "pg": "^8.17.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+<<<<<<< HEAD
     "swagger-ui-express": "^5.0.1",
+=======
+>>>>>>> origin/main
     "typeorm": "^0.3.28"
   },
   "devDependencies": {

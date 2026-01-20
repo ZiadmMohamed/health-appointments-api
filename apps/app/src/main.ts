@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { AppConfig } from './config/app.config';
+import { IAppConfig } from './config/app.config';
 import { SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfigApp } from '@app/common/swagger/swagger.config';
 
@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // Get config & app service
   const configService = app.get(ConfigService);
-  const appConfig = configService.get<AppConfig>('app');
+  const appConfig = configService.get<IAppConfig>('app');
 
   // Set global API prefix
   app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
@@ -33,5 +33,6 @@ async function bootstrap() {
   );
   console.log(`📝 API Documentation: ${await app.getUrl()}/api`);
   console.log(`🌐 Environment: ${appConfig?.env}`);
+  console.log(appConfig);
 }
 bootstrap();
