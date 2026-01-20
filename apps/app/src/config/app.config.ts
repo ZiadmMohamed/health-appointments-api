@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { CommonConfig } from './common.config';
+import { CommonConfig } from '../../../../libs/core/src/config/common.config';
 
 export interface AppConfig {
   name: string;
