@@ -1,4 +1,5 @@
-import { plainToInstance } from 'class-transformer';
+import { Environment } from '@app/common/enums/env.enum';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
@@ -8,13 +9,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
-}
-
-export class EnvironmentVariables {
+export class CommonEnvironmentVariables {
   // Application Environment Config
   @IsEnum(Environment)
   NODE_ENV: Environment;
@@ -70,18 +65,20 @@ export class EnvironmentVariables {
   CORS_ORIGIN?: string;
 }
 
-export function validate(config: Record<string, unknown>) {
-  const validatedConfig = plainToInstance(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
+export function validate<T>(cls: ClassConstructor<T>) {
+  return (config: Record<string, unknown>): T => {
+    const validatedConfig = plainToInstance(cls, config, {
+      enableImplicitConversion: true,
+    });
 
-  const errors = validateSync(validatedConfig, {
-    skipMissingProperties: false,
-  });
+    const errors = validateSync(validatedConfig as object, {
+      skipMissingProperties: false,
+    });
 
-  if (errors.length > 0) {
-    throw new Error(errors.toString());
-  }
+    if (errors.length > 0) {
+      throw new Error(errors.toString());
+    }
 
-  return validatedConfig;
+    return validatedConfig;
+  };
 }
