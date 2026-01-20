@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { CommonConfig } from '../../../../libs/core/src/config/common.config';
 
-export interface AppConfig {
+export interface IAppConfig {
   name: string;
   env: string;
   port: number;
@@ -9,8 +9,8 @@ export interface AppConfig {
   apiVersion?: string;
 }
 
-class AppConfigClass extends CommonConfig {
-  load(): AppConfig {
+class AppConfig extends CommonConfig {
+  load(): IAppConfig {
     return {
       name: this.getEnvString('APP_NAME', 'Healthy'),
       env: this.getEnvString('NODE_ENV', 'development'),
@@ -21,4 +21,4 @@ class AppConfigClass extends CommonConfig {
   }
 }
 
-export default registerAs('app', () => new AppConfigClass().load());
+export default registerAs('app', () => new AppConfig().load());
