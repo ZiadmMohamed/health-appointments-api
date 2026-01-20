@@ -7,12 +7,7 @@ import {
   IsBoolean,
   IsOptional,
 } from 'class-validator';
-
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
-}
+import { Environment } from './enums/env.enum';
 
 export class EnvironmentVariables {
   // Application Environment Config
