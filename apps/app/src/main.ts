@@ -33,6 +33,5 @@ async function bootstrap() {
   );
   console.log(`📝 API Documentation: ${await app.getUrl()}/api`);
   console.log(`🌐 Environment: ${appConfig?.env}`);
-  console.log(appConfig);
 }
 bootstrap();
