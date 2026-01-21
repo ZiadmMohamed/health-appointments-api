@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { IAppConfig } from './config/app.config';
 import { SwaggerModule } from '@nestjs/swagger';
-import { swaggerConfigApp } from '@app/common/swagger/swagger.config';
+import { appSwaggerConfig, setSwaggerConfig } from '@app/common/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +19,7 @@ async function bootstrap() {
   if (appConfig?.env !== 'production') {
     const documentBuilder = SwaggerModule.createDocument(
       app,
-      swaggerConfigApp(),
+      setSwaggerConfig(appSwaggerConfig),
     );
     SwaggerModule.setup('api', app, documentBuilder);
   }
