@@ -45,6 +45,12 @@
       ],
       "@app/database/*": [
         "libs/database/src/*"
+      ],
+      "@app/user": [
+        "libs/user/src"
+      ],
+      "@app/user/*": [
+        "libs/user/src/*"
       ]
     }
   }
