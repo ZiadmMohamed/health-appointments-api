@@ -1,17 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { DatabaseModule } from '@app/database/database.module';
+import { CoreModule } from '@app/core';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    DatabaseModule,
-  ],
+  imports: [DatabaseModule, CoreModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

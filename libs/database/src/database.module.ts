@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 /**
@@ -13,6 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useClass: DatabaseService,
     }),
   ],

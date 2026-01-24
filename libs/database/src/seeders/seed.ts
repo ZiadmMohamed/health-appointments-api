@@ -1,15 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/require-await */
 import { DataSource, EntityManager } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
-import { User } from '@app/user';
-import { usersData } from './factories/user/data';
 
 export default class DataBaseSeed implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {
     const entityManager = dataSource.createEntityManager();
 
-    await seedDataIfNotExist(entityManager, User, usersData, (item) => ({
-      email: item.email,
-    }));
+    // await seedDataIfNotExist(entityManager, User, usersData, (item) => ({
+    //   email: item.email,
+    // }));
   }
 }
 
