@@ -1,10 +1,8 @@
 import { Environment } from '@app/common/enums/env.enum';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
   IsString,
-  validateSync,
   IsBoolean,
   IsOptional,
 } from 'class-validator';
