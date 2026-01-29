@@ -1,13 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Environment } from '@app/common/enums/env.enum';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsString,
-  validateSync,
-  IsBoolean,
-  IsOptional,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CommonEnvironmentVariables {
   // Application Environment Config
@@ -15,40 +8,42 @@ export class CommonEnvironmentVariables {
   NODE_ENV: Environment;
 
   @IsNumber()
-  PORT: number;
+  APP_PORT: number;
 
+  @IsNumber()
+  ADMIN_PORT: number;
   // Database Config
   @IsString()
-  DB_HOST: string;
+  DATABASE_HOST: string;
 
   @IsNumber()
-  DB_PORT: number;
+  DATABASE_PORT: number;
 
   @IsString()
-  DB_USERNAME: string;
+  DATABASE_USERNAME: string;
 
   @IsString()
-  DB_PASSWORD: string;
+  DATABASE_PASSWORD: string;
 
   @IsString()
-  DB_DATABASE: string;
+  DATABASE_NAME: string;
 
-  @IsBoolean()
-  @IsOptional()
-  DB_SYNCHRONIZE?: boolean;
+  // @IsBoolean()
+  // @IsOptional()
+  // DB_SYNCHRONIZE?: boolean;
 
-  @IsBoolean()
-  @IsOptional()
-  DB_LOGGING?: boolean;
+  // @IsBoolean()
+  // @IsOptional()
+  // DB_LOGGING?: boolean;
 
   // JWT Config
-  @IsString()
-  @IsOptional()
-  JWT_SECRET?: string;
+  // @IsString()
+  // @IsOptional()
+  // JWT_SECRET?: string;
 
-  @IsNumber()
-  @IsOptional()
-  JWT_EXPIRATION?: number;
+  // @IsNumber()
+  // @IsOptional()
+  // JWT_EXPIRATION?: number;
 
   // API Config
   @IsString()
@@ -60,7 +55,7 @@ export class CommonEnvironmentVariables {
   API_VERSION?: string;
 
   // Cors Config
-  @IsString()
-  @IsOptional()
-  CORS_ORIGIN?: string;
+  // @IsString()
+  // @IsOptional()
+  // CORS_ORIGIN?: string;
 }

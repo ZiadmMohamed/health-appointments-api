@@ -6,14 +6,11 @@ import { IAppConfig } from './config/app.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Get config & app service
   const configService = app.get(ConfigService);
   const appConfig = configService.get<IAppConfig>('app');
 
-  // Set global API prefix
   app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
 
-  // Start server
   const port = appConfig?.port || 3000;
   await app.listen(port);
 
@@ -24,4 +21,4 @@ async function bootstrap() {
   console.log(`🌐 Environment: ${appConfig?.env}`);
   console.log(appConfig);
 }
-bootstrap();
+bootstrap().catch(console.error);

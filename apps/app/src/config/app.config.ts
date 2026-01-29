@@ -14,7 +14,7 @@ class AppConfig extends CommonConfig {
     return {
       name: this.getEnvString('APP_NAME', 'Healthy'),
       env: this.getEnvString('NODE_ENV', 'development'),
-      port: this.getEnvNumber('PORT', 3000),
+      port: this.getEnvNumber('APP_PORT', 3000),
       apiPrefix: this.getEnvString('API_PREFIX', 'api'),
       apiVersion: this.getEnvString('API_VERSION', 'v1'),
     };
