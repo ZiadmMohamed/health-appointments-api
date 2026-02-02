@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { IAppConfig } from './config/app.config';
+import { ValidationPipe } from '@nestjs/common';
+import { ErrorHandlingInterceptor } from '@app/common/interceptor/error-handler.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +12,18 @@ async function bootstrap() {
   const appConfig = configService.get<IAppConfig>('app');
 
   app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+
+  app.useGlobalInterceptors(new ErrorHandlingInterceptor());
+
 
   const port = appConfig?.port || 3000;
   await app.listen(port);
