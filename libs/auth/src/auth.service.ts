@@ -1,4 +1,4 @@
-import { Injectable, Req } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, Req, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
 import { UserRepository } from "@app/user/repositories/user.repository";
 import { CreateUserDto } from "@app/auth/dtos/create-user.dto";
 import { LoginByEmailDto } from "./dtos/login-by-email.dto";
@@ -8,11 +8,12 @@ import { OtpRepository } from "./repositories/otp.repository";
 import { VerifyOtpDto } from "./dtos/verify-otp.dto";
 import { LoginByPhoneDto } from "./dtos/login-by-phone.dto";
 import { User } from "./entities/user.entity";
-import e, { request, Request } from 'express';
+import { Request } from 'express';
 import { ResetPasswordDto } from "./dtos/reset-password.dto";
 import { CheckEmailDto } from "./dtos/check-email.dto";
 import { compareHash } from "@app/common/security/hash.util";
-import { MailerService } from "@nestjs-modules/mailer";
+import { EmailService } from "libs/email/src/email.service";
+import { ExceptionsHandler } from "@nestjs/core/exceptions/exceptions-handler";
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly otpRepository: OtpRepository,
-    private readonly mailerService: MailerService,
+    private readonly emailService: EmailService,
   ) {}
 
 
@@ -36,14 +37,14 @@ export class AuthService {
     console.log('Email for OTP:', email);
 
     if (!email) {
-      throw new Error('Email is required to send OTP');
+      throw new NotFoundException('Email is required');
     }
 
     const otpExists = await this.otpRepository.findOtpByEmail(email);
     if (otpExists) {
       const now = new Date();
       if (otpExists.expiresAt > now) {
-        throw new Error('An active OTP already exists for this email address');
+        throw new BadRequestException('An active OTP already exists for this email address');
       }
       else {
         await this.otpRepository.removeOtp(otpExists);
@@ -54,15 +55,9 @@ export class AuthService {
 
     await this.otpRepository.createOtp(email, otp);
 
-    await this.mailerService.sendMail({
-      from: this.configService.get('EMAIL'),
-      to: email,
-      subject: 'Your Verification OTP',
-      text: `Your verification OTP is ${otp}`,
-    });
+    await this.emailService.sendOtpToMail(email, otp);
 
-    // Logic to send OTP via SMS gateway would go here
-    console.log(`Sending OTP ${otp} to email ${email}`);
+
     return otp;
   }
 
@@ -74,13 +69,11 @@ export class AuthService {
     const existingUser = await this.userRepository.findByEmail(data.email);
 
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      throw new BadRequestException('User with this email already exists');
     }
 
     await this.userRepository.createUser(data);
 
-    console.log(`Created user with email ${data.email}`);
-    
     const emailDto: CheckEmailDto = { email: data.email };
 
     await this.sendVerificationOtp(emailDto);
@@ -92,21 +85,21 @@ export class AuthService {
   async verifyOtp(data: VerifyOtpDto) {
     const user = await this.userRepository.findOne({ where: { email: data.email } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const otpEntry = await this.otpRepository.findOne({ where: { email: data.email }, order: { createdAt: 'DESC' } });
 
     if (!otpEntry) {
-      throw new Error('No OTP found for this email address');
+      throw new NotFoundException('No OTP found for this email address');
     }
     const now = new Date();
     if (otpEntry.expiresAt < now) {
-      throw new Error('OTP has expired');
+      throw new BadRequestException('OTP has expired');
     }
 
     if (!(await compareHash(data.otp, otpEntry.otpHash))) {
-      throw new Error('Invalid OTP');
+      throw new BadRequestException('Invalid OTP');
     }
 
     await this.otpRepository.remove(otpEntry);
@@ -119,18 +112,17 @@ export class AuthService {
 
   async loginByEmail(data: LoginByEmailDto) {
     const user = await this.userRepository.findByEmail(data.email, true);
-    console.log(user);
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new NotFoundException('Invalid email or password');
     }
 
     if (!(await compareHash(data.password, user.password))) {
-      throw new Error('Invalid email or password');
+      throw new BadRequestException('Invalid email or password');
     }
 
     if (!user.isActive) {
-      throw new Error('User account is not active');
+      throw new BadRequestException('User account is not active');
     }
 
     
@@ -161,15 +153,15 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { phone: data.phone }, select: ['id', 'phone', 'password', 'isActive', 'tokenVersion'] });
 
     if (!user) {
-      throw new Error('Invalid phone number or password');
+      throw new NotFoundException('Invalid phone number or password');
     }
 
     if (!(await compareHash(data.password, user.password))) {
-      throw new Error('Invalid email or password');
+      throw new BadRequestException('Invalid phone number or password');
     }
 
     if (!user.isActive) {
-      throw new Error('User account is not active');
+      throw new BadRequestException('User account is not active');
     }
 
     const access_token = this.jwtService.sign(
@@ -196,13 +188,14 @@ export class AuthService {
   async logout(@Req() request: Express.Request) {
     const req = request as Request & { user?: User };
     const authUser = req.user;
+    console.log('Auth User in logout:', authUser);
     if (!authUser?.id) {
-      throw new Error('User not found');
+      throw new UnauthorizedException('User not found');
     }
 
     const user = await this.userRepository.findById(authUser.id);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     await this.userRepository.updateUser(user.id, { tokenVersion: user.tokenVersion + 1 });
@@ -210,46 +203,24 @@ export class AuthService {
     return { success: true, message: 'Logged out successfully' };
   }
 
-  // async forgetPassword(email: string) {
-  //   const user = await this.userRepository.findOne({ where: { email } });
-  //   if (!user) {
-  //     throw new Error('User with this email does not exist');
-  //   }
-
-  //   const otpExists = await this.otpRepository.findOtpByEmail(user.email);
-  //   if (otpExists) {
-  //     const now = new Date();
-  //       if (otpExists.expiresAt > now) {
-  //         throw new Error('OTP already exists and is not expired');
-  //       }
-  //   }
-
-  //   const emailDto: CheckEmailDto = { email: user.email };
-
-  //   await this.sendVerificationOtp(emailDto);
-
-  //   return { success: true, message: 'OTP sent to your email address' };
-  // }
-
-
 
   async verfyForgetPasswordOtp(data: VerifyOtpDto) {
     const user = await this.userRepository.findOne({ where: { email: data.email } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const otpEntry = await this.otpRepository.findOne({ where: { email: data.email }, order: { createdAt: 'DESC' } });
     if (!otpEntry) {
-      throw new Error('No OTP found for this email address');
+      throw new NotFoundException('No OTP found for this email address');
     }
     const now = new Date();
     if (otpEntry.expiresAt < now) {
-      throw new Error('OTP has expired');
+      throw new UnprocessableEntityException('OTP has expired');
     }
 
     if (!(await compareHash(data.otp, otpEntry.otpHash))) {
-      throw new Error('Invalid OTP');
+      throw new BadRequestException('Invalid OTP');
     }
 
     await this.otpRepository.remove(otpEntry);
@@ -273,12 +244,12 @@ export class AuthService {
     });
 
     if (!payload?.id) {
-      throw new Error('Invalid reset token');
+      throw new UnauthorizedException('Invalid reset token');
     }
 
     const user = await this.userRepository.findOne({ where: { id: payload.id } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     user.password = data.newPassword;
     await this.userRepository.save(user);

@@ -1,8 +1,13 @@
-import { IsEmail, IsIn, IsNotEmpty, IsString, max, MaxLength, maxLength, min, minLength, validate, ValidateIf } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CheckEmailDto {
-    @IsString()
-    @IsNotEmpty()
-    @IsEmail()
-    email: string;
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'User email address',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

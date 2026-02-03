@@ -1,32 +1,58 @@
-import { IsEmail, IsIn, IsNotEmpty, IsString, max, MaxLength, maxLength, min, minLength, validate, ValidateIf } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, ValidateIf } from 'class-validator';
 
 export class CreateUserDto {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @ApiProperty({
+    example: 'Ali Mohammed',
+    description: 'Full name of the user',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsEmail()
-    email: string;
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'Email address of the user',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+  @ApiProperty({
+    example: 'StrongP@ssw0rd',
+    description: 'User password',
+  })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsIn([Math.random()], {message: "Password does not match!"})
-    @ValidateIf(o => o.password !== o.confirmPassword)
-    confirmPassword: string;
+  @ApiProperty({
+    example: 'StrongP@ssw0rd',
+    description: 'Confirm password must match password',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsIn([Math.random()], { message: 'Password does not match!' })
+  @ValidateIf(o => o.password !== o.confirmPassword)
+  confirmPassword: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(11)
-    phone: string;
+  @ApiProperty({
+    example: '01234567890',
+    description: 'Phone number of the user, max 11 characters',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(11)
+  phone: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsIn(['male', 'female'])
-    Gender: 'male' | 'female';
+  @ApiProperty({
+    example: 'male',
+    description: 'Gender of the user, either male or female',
+    enum: ['male', 'female'],
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['male', 'female'])
+  Gender: 'male' | 'female';
 }

@@ -30,11 +30,8 @@ export class Otp {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async hashPassword() {
+  async hashOtp() {
     if (!this.otpHash) return;
-
-    await hash(this.otpHash).then((hashed) => {
-      this.otpHash = hashed;
-    });
+    this.otpHash = await hash(this.otpHash);
   }
 }
