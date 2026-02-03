@@ -10,6 +10,13 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+} 
+
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -29,8 +36,8 @@ export class User {
   @Column({ length: 11 })
   phone: string;
 
-  @Column({ type: 'enum', enum: ['male', 'female'] })
-  Gender: 'male' | 'female';
+  @Column({ type: 'enum', enum: [Gender.MALE, Gender.FEMALE] })
+  Gender: Gender.MALE | Gender.FEMALE;
 
   @Column({ default: false })
   isActive: boolean;

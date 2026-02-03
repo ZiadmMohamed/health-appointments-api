@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, ValidateIf } from 'class-validator';
+import { Gender } from '../entities/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -53,6 +54,6 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsIn(['male', 'female'])
-  Gender: 'male' | 'female';
+  @IsIn([Gender.MALE, Gender.FEMALE])
+  Gender: Gender.MALE | Gender.FEMALE;
 }
