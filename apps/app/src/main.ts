@@ -22,15 +22,6 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, documentBuilder);
   }
 
-  // Swagger setup
-  if (appConfig?.env !== 'production') {
-    const documentBuilder = SwaggerModule.createDocument(
-      app,
-      setSwaggerConfig(appSwaggerConfig),
-    );
-    SwaggerModule.setup('api', app, documentBuilder);
-  }
-
   const port = appConfig?.port || 3000;
   await app.listen(port);
 

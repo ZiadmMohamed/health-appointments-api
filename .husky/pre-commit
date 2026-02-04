@@ -1,0 +1,5 @@
+
+echo "🚀 Running pre-commit checks..."
+
+# Run lint-staged directly
+npx lint-staged

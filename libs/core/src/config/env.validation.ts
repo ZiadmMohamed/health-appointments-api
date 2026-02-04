@@ -1,12 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Environment } from '@app/common/enums/env.enum';
-import {
-  IsEnum,
-  IsNumber,
-  IsString,
-  IsBoolean,
-  IsOptional,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CommonEnvironmentVariables {
   // Application Environment Config
