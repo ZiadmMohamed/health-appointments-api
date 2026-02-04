@@ -1,17 +1,26 @@
 import { DocumentBuilder } from '@nestjs/swagger';
 
-export const swaggerConfigApp = () =>
-  new DocumentBuilder()
-    .setTitle('Healthy Public API')
-    .setDescription('Version 1 API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+export interface ISwaggerConfig {
+  title: string;
+  description: string;
+  version: string;
+  tag?: string;
+  bearerAuth?: boolean;
+}
 
-export const swaggerConfigAdmin = () =>
-  new DocumentBuilder()
-    .setTitle('Healthy Admin API')
-    .setDescription('Version 1 API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+export const setSwaggerConfig = (config: ISwaggerConfig) => {
+  const builder = new DocumentBuilder()
+    .setTitle(config.title)
+    .setDescription(config.description)
+    .setVersion(config.version);
+
+  if (config.tag) {
+    builder.addTag(config.tag);
+  }
+
+  if (config.bearerAuth !== false) {
+    builder.addBearerAuth();
+  }
+
+  return builder.build();
+};

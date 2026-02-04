@@ -10,8 +10,9 @@ This document outlines the high-level architecture of the project, which follows
 2. [Project Structure](#project-structure)
 3. [Module Organization](#module-organization)
 4. [Dependency Flow](#dependency-flow)
-5. [Best Practices](#best-practices)
-6. [Testing Strategy](#testing-strategy)
+5. [Database Migrations](#database-migrations)
+6. [Best Practices](#best-practices)
+7. [Testing Strategy](#testing-strategy)
 
 ---
 
@@ -341,6 +342,255 @@ export class EmailHandler {
   }
 }
 ```
+
+---
+
+## Database Migrations
+
+This project uses **TypeORM** for database migrations with separate migration management for the `app` and `admin` applications. Each application maintains its own migration history and configuration.
+
+### Migration Architecture
+
+```
+apps/
+├── app/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── ormconfig.ts          # App database configuration
+│   │   └── database/
+│   │       └── migrations/           # App-specific migrations
+│   │           └── timestamp-migration-name.ts
+│
+└── admin/
+    ├── src/
+    │   ├── config/
+    │   │   └── ormconfig.ts          # Admin database configuration
+    │   └── database/
+    │       └── migrations/           # Admin-specific migrations
+    │           └── timestamp-migration-name.ts
+```
+
+### Migration CLI Tool
+
+The project includes an interactive CLI tool (`migration-cli.ts`) built with **Commander.js** and **Inquirer.js** to manage migrations for both applications.
+
+#### Interactive Mode (Recommended)
+
+Launch the interactive migration CLI:
+
+```bash
+npm run migration:cli
+```
+
+This will prompt you to:
+
+1. **Select application** (`app` or `admin`)
+2. **Choose migration action**:
+   - Run pending migrations
+   - Revert last migration
+   - Show migrations status
+   - Generate migration from entity changes
+   - Create empty migration file
+3. **Enter migration name** (for generate/create actions)
+4. **Confirm before executing**
+
+#### Direct Command Mode
+
+For automation or quick operations:
+
+```bash
+# Run migrations
+npm run migration:cli run --app app
+npm run migration:cli run --app admin
+
+# Revert last migration
+npm run migration:cli revert --app app
+npm run migration:cli revert --app admin
+
+# Show migration status
+npm run migration:cli show --app app
+npm run migration:cli show --app admin
+
+# Generate migration from entity changes
+npm run migration:cli generate --app app --name CreateUsersTable
+npm run migration:cli generate --app admin --name AddRoleColumn
+
+# Create empty migration file
+npm run migration:cli create --app app --name AddIndexToUsers
+npm run migration:cli create --app admin --name UpdatePermissions
+```
+
+### Migration Workflow
+
+#### 1. Create or Modify Entities
+
+Define your TypeORM entities in the appropriate library
+
+#### 2. Generate Migration
+
+Generate a migration based on entity changes:
+
+```bash
+npm run migration:cli generate --app app --name CreateUsersTable
+```
+
+This will:
+
+- Compare current entities with database schema
+- Generate SQL queries to update the schema
+- Create a timestamped migration file in `apps/app/src/database/migrations/`
+
+#### 3. Review Generated Migration
+
+#### 4. Run Migration
+
+Execute pending migrations:
+
+```bash
+npm run migration:cli run --app app
+```
+
+Output:
+
+```
+============================================================
+Running migration: run for app
+============================================================
+
+Executing: ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli migration:run -d apps/app/src/config/ormconfig.ts
+
+query: SELECT * FROM current_schema()
+query: SELECT * FROM "information_schema"."tables" WHERE "table_schema" = 'public' AND "table_name" = 'app_migrations'
+query: SELECT * FROM "app_migrations" "migrations" ORDER BY "id" DESC
+0 migrations are already loaded in the database.
+1 migrations were found in the source code.
+1 migrations are new migrations that needs to be executed.
+query: START TRANSACTION
+query: CREATE TABLE "users" ...
+query: INSERT INTO "app_migrations"("timestamp", "name") VALUES ($1, $2) -- PARAMETERS: [1234567890,"CreateUsersTable1234567890"]
+Migration CreateUsersTable1234567890 has been executed successfully.
+query: COMMIT
+
+✓ Migration run completed successfully!
+```
+
+#### 5. Revert Migration (if needed)
+
+Rollback the last executed migration:
+
+```bash
+npm run migration:cli revert --app app
+```
+
+### Migration Best Practices
+
+#### 1. **Always Review Generated Migrations**
+
+Generated migrations may not be perfect. Always review and test them before running in production.
+
+#### 2. **Write Reversible Migrations**
+
+Always implement both `up()` and `down()` methods:
+
+```typescript
+public async up(queryRunner: QueryRunner): Promise<void> {
+  await queryRunner.query(`ALTER TABLE "users" ADD "phone" varchar`);
+}
+
+public async down(queryRunner: QueryRunner): Promise<void> {
+  await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "phone"`);
+}
+```
+
+#### 3. **Handle Data Migrations Carefully**
+
+For data migrations, use transactions:
+
+```typescript
+public async up(queryRunner: QueryRunner): Promise<void> {
+  await queryRunner.startTransaction();
+  try {
+    await queryRunner.query(`UPDATE users SET role = 'user' WHERE role IS NULL`);
+    await queryRunner.query(`ALTER TABLE users ALTER COLUMN role SET NOT NULL`);
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    throw err;
+  }
+}
+```
+
+#### 4. **Never Modify Executed Migrations**
+
+Once a migration has been run in production, never modify it. Create a new migration instead.
+
+#### 5. **Test Migrations**
+
+Always test migrations on a development/staging database before production:
+
+```bash
+# Run migration
+npm run migration:cli run --app app
+
+# Test the application
+npm run app:start:dev
+
+# If issues found, revert
+npm run migration:cli revert --app app
+```
+
+#### 6. **Use Descriptive Names**
+
+Use clear, descriptive names for migrations:
+
+```bash
+# ✅ Good
+npm run migration:cli generate --app app --name AddEmailVerificationToUsers
+npm run migration:cli generate --app admin --name CreatePermissionsTable
+
+# ❌ Bad
+npm run migration:cli generate --app app --name Update
+npm run migration:cli generate --app admin --name Fix
+```
+
+### Migration Configuration
+
+Each application has its own TypeORM configuration:
+
+```typescript
+// apps/app/src/config/ormconfig.ts
+export default new DataSource({
+  type: 'postgres',
+  host: dbConfig.host,
+  port: dbConfig.port,
+  username: dbConfig.username,
+  password: dbConfig.password,
+  database: dbConfig.database,
+  entities: [join(__dirname, '../**/entities/*.entity{.ts,.js}')],
+  migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
+  migrationsTableName: 'app_migrations', // Separate migration history
+  synchronize: false, // Never use synchronize: true in production
+  logging: dbConfig.logging,
+});
+```
+
+### Troubleshooting
+
+#### Issue: Migration generation fails with "No changes in database schema were found"
+
+**Solution**: Ensure your entities are:
+
+1. Properly decorated with TypeORM decorators
+2. Registered in the application module
+3. Included in the `entities` path in `ormconfig.ts`
+
+#### Issue: TypeScript path aliases not resolving
+
+**Solution**: The CLI uses `ts-node -r tsconfig-paths/register` to resolve path aliases like `@app/*`. Ensure your `tsconfig.json` has the correct path mappings.
+
+#### Issue: Different migration history between environments
+
+**Solution**: Always run migrations in order and never skip or manually modify the migrations table. Use version control to track migration files.
 
 ---
 

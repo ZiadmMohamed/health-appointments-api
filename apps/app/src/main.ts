@@ -1,30 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { AppConfig } from './config/app.config';
+import { IAppConfig } from './config/app.config';
 import { SwaggerModule } from '@nestjs/swagger';
-import { swaggerConfigApp } from '@app/common/swagger/swagger.config';
+import { appSwaggerConfig, setSwaggerConfig } from '@app/common/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Get config & app service
   const configService = app.get(ConfigService);
-  const appConfig = configService.get<AppConfig>('app');
+  const appConfig = configService.get<IAppConfig>('app');
 
-  // Set global API prefix
   app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
 
   // Swagger setup
   if (appConfig?.env !== 'production') {
     const documentBuilder = SwaggerModule.createDocument(
       app,
-      swaggerConfigApp(),
+      setSwaggerConfig(appSwaggerConfig),
     );
     SwaggerModule.setup('api', app, documentBuilder);
   }
 
-  // Start server
   const port = appConfig?.port || 3000;
   await app.listen(port);
 
@@ -34,4 +31,4 @@ async function bootstrap() {
   console.log(`📝 API Documentation: ${await app.getUrl()}/api`);
   console.log(`🌐 Environment: ${appConfig?.env}`);
 }
-bootstrap();
+bootstrap().catch(console.error);
