@@ -10,6 +10,14 @@ import {
 } from 'typeorm';
 
 
+export enum OtpType {
+  VERIFICATION = 'VERIFICATION',
+  RESET_PASSWORD = 'RESET_PASSWORD',
+}
+
+
+
+
 @Entity('otps')
 export class Otp {
   @PrimaryGeneratedColumn('uuid')
@@ -21,6 +29,9 @@ export class Otp {
 
   @Column()
   otpHash: string;
+
+  @Column({ type: 'enum', enum: OtpType })
+  type: OtpType;
 
   @Column({ type: 'timestamp', default: () => "now() + interval '10 minutes'" })
   expiresAt: Date;

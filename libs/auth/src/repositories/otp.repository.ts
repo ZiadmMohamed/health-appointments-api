@@ -1,7 +1,7 @@
 // src/modules/user/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Otp } from '../entities/otp.entity';
+import { Otp, OtpType } from '../entities/otp.entity';
 
 
 @Injectable()
@@ -10,10 +10,11 @@ export class OtpRepository extends Repository<Otp> {
     super(Otp, dataSource.createEntityManager());
   }
 
-  async createOtp(email: string, otp: string): Promise<void> {
+  async createOtp(email: string, otp: string, type: OtpType): Promise<void> {
     const otpEntry = this.create({
         email, 
-        otpHash: otp, 
+        otpHash: otp,
+        type,
     });
     await this.save(otpEntry);
   }

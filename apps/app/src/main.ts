@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { IAppConfig } from './config/app.config';
 import { ValidationPipe } from '@nestjs/common';
 import { ErrorHandlingInterceptor } from '@app/common/interceptor/error-handler.interceptor';
+import { ResponseTransformInterceptor } from '@app/common/interceptor/success-handler.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,7 +23,7 @@ async function bootstrap() {
   );
 
 
-  app.useGlobalInterceptors(new ErrorHandlingInterceptor());
+  app.useGlobalInterceptors(new ErrorHandlingInterceptor(), new ResponseTransformInterceptor());
 
 
   const port = appConfig?.port || 3000;

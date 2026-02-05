@@ -1,7 +1,7 @@
 // src/modules/user/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from '@app/auth/entities/user.entity';
+import { User } from '@app/user/entities/user.entity';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -29,7 +29,11 @@ export class UserRepository extends Repository<User> {
   }
 
   async updateUser(id: number, data: Partial<User>): Promise<void> {
-    await this.update(id, data);
+    const user = await this.findOne({ where: { id } });
+    if (!user) return;
+
+    Object.assign(user, data);
+    await this.save(user);
   }
 
 }

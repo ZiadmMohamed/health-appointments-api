@@ -1,5 +1,7 @@
 import { CallHandler, ExecutionContext, HttpException, Injectable, InternalServerErrorException, NestInterceptor } from "@nestjs/common";
-import { catchError, map, Observable, tap } from "rxjs";
+import { catchError, Observable } from "rxjs";
+
+
 
 @Injectable()
 export class ErrorHandlingInterceptor implements NestInterceptor {

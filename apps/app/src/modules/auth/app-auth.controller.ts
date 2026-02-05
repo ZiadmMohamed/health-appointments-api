@@ -3,12 +3,13 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { AuthService } from '@app/auth/auth.service';
 import { Public } from '@app/common/decorators/public.decorator';
-import { CreateUserDto } from '@app/auth/dtos/create-user.dto';
-import { LoginByEmailDto } from '@app/auth/dtos/login-by-email.dto';
-import { VerifyOtpDto } from '@app/auth/dtos/verify-otp.dto';
-import { LoginByPhoneDto } from '@app/auth/dtos/login-by-phone.dto';
-import { ResetPasswordDto } from '@app/auth/dtos/reset-password.dto';
-import { CheckEmailDto } from '@app/auth/dtos/check-email.dto';
+import { CreateUserDto } from 'apps/app/src/modules/auth/dtos/create-user.dto';
+import { LoginByEmailDto } from 'apps/app/src/modules/auth/dtos/login-by-email.dto';
+import { VerifyOtpDto } from 'apps/app/src/modules/auth/dtos/verify-otp.dto';
+import { LoginByPhoneDto } from 'apps/app/src/modules/auth/dtos/login-by-phone.dto';
+import { ResetPasswordDto } from 'apps/app/src/modules/auth/dtos/reset-password.dto';
+import { CheckEmailDto } from 'apps/app/src/modules/auth/dtos/check-email.dto';
+import { OtpType } from '@app/auth/entities/otp.entity';
 
 // Response DTO placeholders
 class RegisterResponseDto {}
@@ -80,6 +81,14 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User logged out successfully', type: LogoutResponseDto })
   logout(@Req() request: Express.Request) {
     return this.authService.logout(request);
+  }
+
+  @Public()
+  @Post('send-forget-password-otp')
+  @ApiOperation({ summary: 'Send OTP for forgotten password' })
+  @ApiResponse({ status: 200, description: 'OTP sent successfully', type: OtpResponseDto })
+  sendForgetPasswordOtp(@Body() email: CheckEmailDto) {
+    return this.authService.sendVerificationOtp(email, OtpType.RESET_PASSWORD);
   }
 
   @Public()

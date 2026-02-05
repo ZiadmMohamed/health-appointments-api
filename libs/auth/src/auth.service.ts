@@ -1,24 +1,24 @@
 import { BadRequestException, Injectable, NotFoundException, Req, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
-import { UserRepository } from "@app/user/repositories/user.repository";
-import { CreateUserDto } from "@app/auth/dtos/create-user.dto";
-import { LoginByEmailDto } from "./dtos/login-by-email.dto";
+import { CreateUserDto } from "apps/app/src/modules/auth/dtos/create-user.dto";
+import { LoginByEmailDto } from "../../../apps/app/src/modules/auth/dtos/login-by-email.dto";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { OtpRepository } from "./repositories/otp.repository";
-import { VerifyOtpDto } from "./dtos/verify-otp.dto";
-import { LoginByPhoneDto } from "./dtos/login-by-phone.dto";
-import { User } from "./entities/user.entity";
+import { VerifyOtpDto } from "../../../apps/app/src/modules/auth/dtos/verify-otp.dto";
+import { LoginByPhoneDto } from "../../../apps/app/src/modules/auth/dtos/login-by-phone.dto";
+import { User } from "../../user/src/entities/user.entity";
 import { Request } from 'express';
-import { ResetPasswordDto } from "./dtos/reset-password.dto";
-import { CheckEmailDto } from "./dtos/check-email.dto";
+import { ResetPasswordDto } from "../../../apps/app/src/modules/auth/dtos/reset-password.dto";
+import { CheckEmailDto } from "../../../apps/app/src/modules/auth/dtos/check-email.dto";
 import { compareHash } from "@app/common/security/hash.util";
 import { EmailService } from "libs/email/src/email.service";
-import { ExceptionsHandler } from "@nestjs/core/exceptions/exceptions-handler";
+import { UserService } from "@app/user/user.service";
+import { OtpType } from "./entities/otp.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userRepository: UserRepository, 
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly otpRepository: OtpRepository,
@@ -31,10 +31,9 @@ export class AuthService {
   }
 
 
-  async sendVerificationOtp(emailDto: CheckEmailDto) {
+  async sendVerificationOtp(emailDto: CheckEmailDto, type: OtpType = OtpType.VERIFICATION) {
     const email = emailDto?.email;
 
-    console.log('Email for OTP:', email);
 
     if (!email) {
       throw new NotFoundException('Email is required');
@@ -53,7 +52,7 @@ export class AuthService {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await this.otpRepository.createOtp(email, otp);
+    await this.otpRepository.createOtp(email, otp, type);
 
     await this.emailService.sendOtpToMail(email, otp);
 
@@ -66,13 +65,13 @@ export class AuthService {
     data.email = data.email?.trim().toLowerCase();
     data.phone = data.phone?.trim();
 
-    const existingUser = await this.userRepository.findByEmail(data.email);
+    const existingUser = await this.userService.findUserByEmail(data.email);
 
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');
     }
 
-    await this.userRepository.createUser(data);
+    await this.userService.createUser(data);
 
     const emailDto: CheckEmailDto = { email: data.email };
 
@@ -83,16 +82,21 @@ export class AuthService {
 
 
   async verifyOtp(data: VerifyOtpDto) {
-    const user = await this.userRepository.findOne({ where: { email: data.email } });
+    const user = await this.userService.findUserByEmail(data.email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const otpEntry = await this.otpRepository.findOne({ where: { email: data.email }, order: { createdAt: 'DESC' } });
-
     if (!otpEntry) {
       throw new NotFoundException('No OTP found for this email address');
     }
+
+    const otpType = otpEntry.type;
+    if (otpType !== OtpType.VERIFICATION) {
+      throw new BadRequestException('OTP type mismatch');
+    }
+
     const now = new Date();
     if (otpEntry.expiresAt < now) {
       throw new BadRequestException('OTP has expired');
@@ -104,14 +108,14 @@ export class AuthService {
 
     await this.otpRepository.remove(otpEntry);
 
-    await this.userRepository.update({id: user.id}, {isActive: true});
+    await this.userService.updateUser(user.id, { isActive: true });
 
     return {success: true, message: 'account verified successfully'};
   }
 
 
   async loginByEmail(data: LoginByEmailDto) {
-    const user = await this.userRepository.findByEmail(data.email, true);
+    const user = await this.userService.findUserByEmail(data.email, true);
 
     if (!user) {
       throw new NotFoundException('Invalid email or password');
@@ -150,7 +154,7 @@ export class AuthService {
 
 
   async loginByNumber(data: LoginByPhoneDto) {
-    const user = await this.userRepository.findOne({ where: { phone: data.phone }, select: ['id', 'phone', 'password', 'isActive', 'tokenVersion'] });
+    const user = await this.userService.findUserByPhone(data.phone);
 
     if (!user) {
       throw new NotFoundException('Invalid phone number or password');
@@ -188,24 +192,24 @@ export class AuthService {
   async logout(@Req() request: Express.Request) {
     const req = request as Request & { user?: User };
     const authUser = req.user;
-    console.log('Auth User in logout:', authUser);
+
     if (!authUser?.id) {
       throw new UnauthorizedException('User not found');
     }
 
-    const user = await this.userRepository.findById(authUser.id);
+    const user = await this.userService.findUserById(authUser.id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    await this.userRepository.updateUser(user.id, { tokenVersion: user.tokenVersion + 1 });
+    await this.userService.updateUser(user.id, { tokenVersion: user.tokenVersion + 1 });
 
     return { success: true, message: 'Logged out successfully' };
   }
 
 
   async verfyForgetPasswordOtp(data: VerifyOtpDto) {
-    const user = await this.userRepository.findOne({ where: { email: data.email } });
+    const user = await this.userService.findUserByEmail(data.email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -214,9 +218,15 @@ export class AuthService {
     if (!otpEntry) {
       throw new NotFoundException('No OTP found for this email address');
     }
+
     const now = new Date();
     if (otpEntry.expiresAt < now) {
       throw new UnprocessableEntityException('OTP has expired');
+    }
+
+    const otpType = otpEntry.type;
+    if (otpType !== OtpType.RESET_PASSWORD) {
+      throw new BadRequestException('OTP type mismatch');
     }
 
     if (!(await compareHash(data.otp, otpEntry.otpHash))) {
@@ -247,12 +257,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid reset token');
     }
 
-    const user = await this.userRepository.findOne({ where: { id: payload.id } });
+    const user = await this.userService.findUserById(payload.id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
     user.password = data.newPassword;
-    await this.userRepository.save(user);
+    await this.userService.updateUser(user.id, { password: user.password });
 
     return { success: true, message: 'Password reset successfully' };
   }
