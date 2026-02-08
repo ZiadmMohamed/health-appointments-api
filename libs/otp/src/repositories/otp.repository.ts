@@ -12,7 +12,7 @@ export class OtpRepository extends Repository<Otp> {
 
   async createOtp(email: string, otp: string, type: OtpType): Promise<void> {
     const otpEntry = this.create({
-        email, 
+        email,
         otpHash: otp,
         type,
     });

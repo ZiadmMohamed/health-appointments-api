@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserRepository } from './repositories/user.repository';
 
 
 
@@ -12,9 +13,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   ],
   providers: [
     UserService,
+    UserRepository
   ],
   exports: [
     UserService,
+    UserRepository
   ],
 })
 export class UserModule {}

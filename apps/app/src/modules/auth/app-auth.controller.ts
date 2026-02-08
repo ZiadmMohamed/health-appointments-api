@@ -9,7 +9,7 @@ import { VerifyOtpDto } from 'apps/app/src/modules/auth/dtos/verify-otp.dto';
 import { LoginByPhoneDto } from 'apps/app/src/modules/auth/dtos/login-by-phone.dto';
 import { ResetPasswordDto } from 'apps/app/src/modules/auth/dtos/reset-password.dto';
 import { CheckEmailDto } from 'apps/app/src/modules/auth/dtos/check-email.dto';
-import { OtpType } from '@app/auth/entities/otp.entity';
+import { OtpType } from 'libs/otp/src/entities/otp.entity';
 
 // Response DTO placeholders
 class RegisterResponseDto {}

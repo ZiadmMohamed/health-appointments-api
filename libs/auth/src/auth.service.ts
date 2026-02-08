@@ -3,7 +3,6 @@ import { CreateUserDto } from "apps/app/src/modules/auth/dtos/create-user.dto";
 import { LoginByEmailDto } from "../../../apps/app/src/modules/auth/dtos/login-by-email.dto";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { OtpRepository } from "./repositories/otp.repository";
 import { VerifyOtpDto } from "../../../apps/app/src/modules/auth/dtos/verify-otp.dto";
 import { LoginByPhoneDto } from "../../../apps/app/src/modules/auth/dtos/login-by-phone.dto";
 import { User } from "../../user/src/entities/user.entity";
@@ -13,7 +12,8 @@ import { CheckEmailDto } from "../../../apps/app/src/modules/auth/dtos/check-ema
 import { compareHash } from "@app/common/security/hash.util";
 import { EmailService } from "libs/email/src/email.service";
 import { UserService } from "@app/user/user.service";
-import { OtpType } from "./entities/otp.entity";
+import { OtpType } from "../../otp/src/entities/otp.entity";
+import { OtpService } from "libs/otp/src/otp.service";
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly otpRepository: OtpRepository,
+    private readonly otpService: OtpService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -39,23 +39,22 @@ export class AuthService {
       throw new NotFoundException('Email is required');
     }
 
-    const otpExists = await this.otpRepository.findOtpByEmail(email);
+    const otpExists = await this.otpService.findOtpByEmail(email);
     if (otpExists) {
       const now = new Date();
-      if (otpExists.expiresAt > now) {
+      if (await this.otpService.otpExpired(otpExists.expiresAt)) {
         throw new BadRequestException('An active OTP already exists for this email address');
       }
       else {
-        await this.otpRepository.removeOtp(otpExists);
+        await this.otpService.removeOtp(otpExists);
       }
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await this.otpRepository.createOtp(email, otp, type);
+    await this.otpService.createOtp(email, otp, type);
 
     await this.emailService.sendOtpToMail(email, otp);
-
 
     return otp;
   }
@@ -87,7 +86,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const otpEntry = await this.otpRepository.findOne({ where: { email: data.email }, order: { createdAt: 'DESC' } });
+    const otpEntry = await this.otpService.findOtpByEmail(data.email);
     if (!otpEntry) {
       throw new NotFoundException('No OTP found for this email address');
     }
@@ -106,7 +105,7 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
 
-    await this.otpRepository.remove(otpEntry);
+    await this.otpService.removeOtp(otpEntry);
 
     await this.userService.updateUser(user.id, { isActive: true });
 
@@ -214,7 +213,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const otpEntry = await this.otpRepository.findOne({ where: { email: data.email }, order: { createdAt: 'DESC' } });
+    const otpEntry = await this.otpService.findOtpByEmail(data.email);
     if (!otpEntry) {
       throw new NotFoundException('No OTP found for this email address');
     }
@@ -233,7 +232,7 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
 
-    await this.otpRepository.remove(otpEntry);
+    await this.otpService.removeOtp(otpEntry);
 
     const resetToken = this.jwtService.sign(
       {id: user.id },
@@ -267,5 +266,4 @@ export class AuthService {
 
     return { success: true, message: 'Password reset successfully' };
   }
-
 }
