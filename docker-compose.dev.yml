@@ -1,24 +1,35 @@
+# docker-compose.dev.yml
+version: '3.8'
 services:
   db:
     image: postgres:16.2-alpine3.19
-    restart: always
-    env_file:
-      - '.env'
+    container_name: health-db-dev
+    restart: unless-stopped
     ports:
-      - 5432:5432
+      - '5432:5432'
     environment:
       POSTGRES_DB: health
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  db-test:
-    image: postgres:16.2-alpine3.19
-    restart: always
-    env_file:
-      - '.env'
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_DB: health
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  # Remove db-test for now to simplicity
+  # db-test:
+  #   image: postgres:16.2-alpine3.19
+  #   container_name: health-db-test
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5433:5432"
+  #   environment:
+  #     POSTGRES_DB: health_test  # Changed to health_test (different name!)
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+
+volumes:
+  postgres_dev_data:
