@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
@@ -14,6 +14,7 @@ export class EnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment;
 
+  @Type(() => Number)
   @IsNumber()
   PORT: number;
 
@@ -21,6 +22,7 @@ export class EnvironmentVariables {
   @IsString()
   DB_HOST: string;
 
+  @Type(() => Number)
   @IsNumber()
   DB_PORT: number;
 
@@ -30,8 +32,8 @@ export class EnvironmentVariables {
   @IsString()
   DB_PASSWORD: string;
 
-  @IsString()
-  DB_DATABASE: string;
+  // @IsString()
+  // DB_DATABASE: string;
 
   @IsBoolean()
   @IsOptional()
@@ -46,6 +48,7 @@ export class EnvironmentVariables {
   @IsOptional()
   JWT_SECRET?: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   JWT_EXPIRATION?: number;

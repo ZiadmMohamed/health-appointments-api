@@ -22,8 +22,12 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@app/article": ["libs/article/src"],
+      "@app/article/*": ["libs/article/src/*"],
       "@app/auth": ["libs/auth/src"],
       "@app/auth/*": ["libs/auth/src/*"],
+      "@app/base-repository": ["libs/base-repository/src"],
+      "@app/base-repository/*": ["libs/base-repository/src/*"],
       "@app/common": ["libs/common/src"],
       "@app/common/*": ["libs/common/src/*"],
       "@app/core": ["libs/core/src"],
