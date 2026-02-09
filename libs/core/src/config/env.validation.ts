@@ -1,4 +1,5 @@
 import { Environment } from '@app/common/enums/env.enum';
+import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CommonEnvironmentVariables {
@@ -6,26 +7,29 @@ export class CommonEnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment;
 
+  @Type(() => Number)
   @IsNumber()
-  APP_PORT: number;
+  PORT: number;
 
   @IsNumber()
+  @Type(() => Number)
   ADMIN_PORT: number;
   // Database Config
   @IsString()
-  DATABASE_HOST: string;
+  DB_HOST: string;
 
   @IsNumber()
-  DATABASE_PORT: number;
+  @Type(() => Number)
+  DB_PORT: number;
 
   @IsString()
-  DATABASE_USERNAME: string;
+  DB_USERNAME: string;
 
   @IsString()
-  DATABASE_PASSWORD: string;
+  DB_PASSWORD: string;
 
   @IsString()
-  DATABASE_NAME: string;
+  DB_NAME: string;
 
   // @IsBoolean()
   // @IsOptional()
