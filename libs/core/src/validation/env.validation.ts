@@ -1,4 +1,4 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
@@ -15,31 +15,33 @@ export class EnvironmentVariables {
   NODE_ENV: Environment;
 
   @IsNumber()
-  PORT: number;
+  @Type(() => Number)
+  APP_PORT: number;
 
   // Database Config
   @IsString()
-  DB_HOST: string;
+  DATABASE_HOST: string;
 
   @IsNumber()
-  DB_PORT: number;
+  @Type(() => Number)
+  DATABASE_PORT: number;
 
   @IsString()
-  DB_USERNAME: string;
+  DATABASE_USERNAME: string;
 
   @IsString()
-  DB_PASSWORD: string;
+  DATABASE_PASSWORD: string;
 
   @IsString()
-  DB_DATABASE: string;
+  DATABASE_NAME: string;
 
   @IsBoolean()
   @IsOptional()
-  DB_SYNCHRONIZE?: boolean;
+  DATABASE_SYNCHRONIZE?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  DB_LOGGING?: boolean;
+  DATABASE_LOGGING?: boolean;
 
   // JWT Config
   @IsString()

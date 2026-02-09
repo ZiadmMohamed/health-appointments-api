@@ -5,4 +5,4 @@ async function bootstrap() {
   const app = await NestFactory.create(AdminModule);
   await app.listen(process.env.ADMIN_PORT ?? 3001);
 }
-bootstrap();
+void bootstrap();

@@ -972,12 +972,15 @@ app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
 ```
 
 ### Husky Pre-commit
+
 You need to use this commit format:
 type: subject
 Like:
+
 ```bash
 git commit -m "chore: test commit"
 ```
+
 Valid types from husky config: feat, fix, docs, style, refactor, test, chore, revert
 Examples:
 
@@ -985,6 +988,26 @@ feat: add new feature
 fix: resolve bug in login
 docs: update README
 test: add unit tests
+
+### Winston Logger Service
+
+Logger module imported globally, HttpLoggingInterceptor registered globally
+Use the logger in your services:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { WinstonLoggerService } from '@libs/common';
+
+@Injectable()
+export class UserService {
+  constructor(private readonly logger: WinstonLoggerService) {}
+
+  async findAll() {
+    this.logger.log('Fetching all users', 'UserService');
+    // ... your logic
+  }
+}
+```
 
 ## Additional Resources
 
