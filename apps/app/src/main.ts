@@ -5,6 +5,8 @@ import { IAppConfig } from './config/app.config';
 import { ValidationPipe } from '@nestjs/common';
 import { ErrorHandlingInterceptor } from '@app/common/interceptor/error-handler.interceptor';
 import { ResponseTransformInterceptor } from '@app/common/interceptor/success-handler.interceptor';
+import { SwaggerModule } from '@nestjs/swagger';
+import { appSwaggerConfig, setSwaggerConfig } from '@app/common/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,9 +24,19 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalInterceptors(
+    new ErrorHandlingInterceptor(),
+    new ResponseTransformInterceptor(),
+  );
 
-  app.useGlobalInterceptors(new ErrorHandlingInterceptor(), new ResponseTransformInterceptor());
-
+  // Swagger setup
+  if (appConfig?.env !== 'production') {
+    const documentBuilder = SwaggerModule.createDocument(
+      app,
+      setSwaggerConfig(appSwaggerConfig),
+    );
+    SwaggerModule.setup('api', app, documentBuilder);
+  }
 
   const port = appConfig?.port || 3000;
   await app.listen(port);
@@ -34,6 +46,5 @@ async function bootstrap() {
   );
   console.log(`📝 API Documentation: ${await app.getUrl()}/api`);
   console.log(`🌐 Environment: ${appConfig?.env}`);
-  console.log(appConfig);
 }
 bootstrap().catch(console.error);

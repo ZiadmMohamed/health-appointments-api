@@ -10,12 +10,10 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 
-
 export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
-} 
-
+}
 
 @Entity('users')
 export class User {
@@ -33,7 +31,7 @@ export class User {
   password: string;
 
   @Index({ unique: true })
-  @Column({ length: 11 })
+  @Column()
   phone: string;
 
   @Column({ type: 'enum', enum: [Gender.MALE, Gender.FEMALE] })

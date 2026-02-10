@@ -22,36 +22,16 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/auth": [
-        "libs/auth/src"
-      ],
-      "@app/auth/*": [
-        "libs/auth/src/*"
-      ],
-      "@app/common": [
-        "libs/common/src"
-      ],
-      "@app/common/*": [
-        "libs/common/src/*"
-      ],
-      "@app/core": [
-        "libs/core/src"
-      ],
-      "@app/core/*": [
-        "libs/core/src/*"
-      ],
-      "@app/database": [
-        "libs/database/src"
-      ],
-      "@app/database/*": [
-        "libs/database/src/*"
-      ],
-      "@app/user": [
-        "libs/user/src"
-      ],
-      "@app/user/*": [
-        "libs/user/src/*"
-      ]
+      "@app/auth": ["libs/auth/src"],
+      "@app/auth/*": ["libs/auth/src/*"],
+      "@app/common": ["libs/common/src"],
+      "@app/common/*": ["libs/common/src/*"],
+      "@app/core": ["libs/core/src"],
+      "@app/core/*": ["libs/core/src/*"],
+      "@app/database": ["libs/database/src"],
+      "@app/database/*": ["libs/database/src/*"],
+      "@app/user": ["libs/user/src"],
+      "@app/user/*": ["libs/user/src/*"]
     }
   }
 }

@@ -1,19 +1,30 @@
-import { BadRequestException, Injectable, NotFoundException, Req, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
-import { CreateUserDto } from "apps/app/src/modules/auth/dtos/create-user.dto";
-import { LoginByEmailDto } from "../../../apps/app/src/modules/auth/dtos/login-by-email.dto";
-import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
-import { VerifyOtpDto } from "../../../apps/app/src/modules/auth/dtos/verify-otp.dto";
-import { LoginByPhoneDto } from "../../../apps/app/src/modules/auth/dtos/login-by-phone.dto";
-import { User } from "../../user/src/entities/user.entity";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  Req,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { CreateUserDto } from 'apps/app/src/modules/auth/dtos/create-user.dto';
+import { LoginByEmailDto } from '../../../apps/app/src/modules/auth/dtos/login-by-email.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { VerifyOtpDto } from '../../../apps/app/src/modules/auth/dtos/verify-otp.dto';
+import { LoginByPhoneDto } from '../../../apps/app/src/modules/auth/dtos/login-by-phone.dto';
+import { User } from '../../user/src/entities/user.entity';
 import { Request } from 'express';
-import { ResetPasswordDto } from "../../../apps/app/src/modules/auth/dtos/reset-password.dto";
-import { CheckEmailDto } from "../../../apps/app/src/modules/auth/dtos/check-email.dto";
-import { compareHash } from "@app/common/security/hash.util";
-import { EmailService } from "libs/email/src/email.service";
-import { UserService } from "@app/user/user.service";
-import { OtpType } from "../../otp/src/entities/otp.entity";
-import { OtpService } from "libs/otp/src/otp.service";
+import { ResetPasswordDto } from '../../../apps/app/src/modules/auth/dtos/reset-password.dto';
+import { CheckEmailDto } from '../../../apps/app/src/modules/auth/dtos/check-email.dto';
+import { compareHash } from '@app/common/security/hash.util';
+import { EmailService } from 'libs/email/src/email.service';
+import { UserService } from '@app/user/user.service';
+import { OtpType } from '../../otp/src/entities/otp.entity';
+import { OtpService } from 'libs/otp/src/otp.service';
+
+interface ResetTokenPayload {
+  id: number;
+}
 
 @Injectable()
 export class AuthService {
@@ -25,15 +36,11 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-
-  async hello() {
-    return "Hello from AuthService!";
-  }
-
-
-  async sendVerificationOtp(emailDto: CheckEmailDto, type: OtpType = OtpType.VERIFICATION) {
+  async sendVerificationOtp(
+    emailDto: CheckEmailDto,
+    type: OtpType = OtpType.VERIFICATION,
+  ) {
     const email = emailDto?.email;
-
 
     if (!email) {
       throw new NotFoundException('Email is required');
@@ -41,11 +48,11 @@ export class AuthService {
 
     const otpExists = await this.otpService.findOtpByEmail(email);
     if (otpExists) {
-      const now = new Date();
       if (await this.otpService.otpExpired(otpExists.expiresAt)) {
-        throw new BadRequestException('An active OTP already exists for this email address');
-      }
-      else {
+        throw new BadRequestException(
+          'An active OTP already exists for this email address',
+        );
+      } else {
         await this.otpService.removeOtp(otpExists);
       }
     }
@@ -58,7 +65,6 @@ export class AuthService {
 
     return otp;
   }
-
 
   async register(data: CreateUserDto) {
     data.email = data.email?.trim().toLowerCase();
@@ -76,9 +82,8 @@ export class AuthService {
 
     await this.sendVerificationOtp(emailDto);
 
-    return {success: true, message: 'User created successfully'};
+    return { success: true, message: 'User created successfully' };
   }
-
 
   async verifyOtp(data: VerifyOtpDto) {
     const user = await this.userService.findUserByEmail(data.email);
@@ -109,9 +114,8 @@ export class AuthService {
 
     await this.userService.updateUser(user.id, { isActive: true });
 
-    return {success: true, message: 'account verified successfully'};
+    return { success: true, message: 'account verified successfully' };
   }
-
 
   async loginByEmail(data: LoginByEmailDto) {
     const user = await this.userService.findUserByEmail(data.email, true);
@@ -128,29 +132,24 @@ export class AuthService {
       throw new BadRequestException('User account is not active');
     }
 
-    
     const access_token = this.jwtService.sign(
-      {id: user.id, tokenVersion: user.tokenVersion},
+      { id: user.id, tokenVersion: user.tokenVersion },
       {
-        secret: this.configService.get('JWT_SECRET'), 
+        secret: this.configService.get('JWT_SECRET'),
         expiresIn: this.configService.get('ACCESS_TOKEN_EXPIRATION'),
-      }
+      },
     );
 
-
     const refresh_token = this.jwtService.sign(
-      {id: user.id, tokenVersion: user.tokenVersion},
+      { id: user.id, tokenVersion: user.tokenVersion },
       {
         secret: this.configService.get('JWT_SECRET'),
         expiresIn: this.configService.get('REFRESH_TOKEN_EXPIRATION'),
-      }
+      },
     );
 
-
-    return {success: true, data: {access_token, refresh_token}};
+    return { success: true, data: { access_token, refresh_token } };
   }
-
-
 
   async loginByNumber(data: LoginByPhoneDto) {
     const user = await this.userService.findUserByPhone(data.phone);
@@ -168,25 +167,23 @@ export class AuthService {
     }
 
     const access_token = this.jwtService.sign(
-      {id: user.id, tokenVersion: user.tokenVersion},
+      { id: user.id, tokenVersion: user.tokenVersion },
       {
-        secret: this.configService.get('JWT_SECRET'), 
+        secret: this.configService.get('JWT_SECRET'),
         expiresIn: this.configService.get('ACCESS_TOKEN_EXPIRATION'),
-      }
+      },
     );
 
     const refresh_token = this.jwtService.sign(
-      {id: user.id, tokenVersion: user.tokenVersion},
+      { id: user.id, tokenVersion: user.tokenVersion },
       {
         secret: this.configService.get('JWT_SECRET'),
         expiresIn: this.configService.get('REFRESH_TOKEN_EXPIRATION'),
-      }
+      },
     );
 
-    return {success: true, data: {access_token, refresh_token}};
+    return { success: true, data: { access_token, refresh_token } };
   }
-
-  
 
   async logout(@Req() request: Express.Request) {
     const req = request as Request & { user?: User };
@@ -201,11 +198,12 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    await this.userService.updateUser(user.id, { tokenVersion: user.tokenVersion + 1 });
+    await this.userService.updateUser(user.id, {
+      tokenVersion: user.tokenVersion + 1,
+    });
 
     return { success: true, message: 'Logged out successfully' };
   }
-
 
   async verfyForgetPasswordOtp(data: VerifyOtpDto) {
     const user = await this.userService.findUserByEmail(data.email);
@@ -235,24 +233,26 @@ export class AuthService {
     await this.otpService.removeOtp(otpEntry);
 
     const resetToken = this.jwtService.sign(
-      {id: user.id },
+      { id: user.id },
       {
         secret: this.configService.get('JWT_SECRET'),
         expiresIn: '15m',
-      }
+      },
     );
 
-    return {success: true, message: 'OTP verified successfully', data: { resetToken }};
+    return {
+      success: true,
+      message: 'OTP verified successfully',
+      data: { resetToken },
+    };
   }
 
-
-  
   async resetPassword(data: ResetPasswordDto) {
-    const payload = this.jwtService.verify(data.resetToken, {
+    const payload = this.jwtService.verify<ResetTokenPayload>(data.resetToken, {
       secret: this.configService.get('JWT_SECRET'),
     });
 
-    if (!payload?.id) {
+    if (!payload.id) {
       throw new UnauthorizedException('Invalid reset token');
     }
 

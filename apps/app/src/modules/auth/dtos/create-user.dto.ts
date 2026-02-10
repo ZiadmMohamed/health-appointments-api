@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, ValidateIf } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 import { Gender } from '../../../../../../libs/user/src/entities/user.entity';
 
 export class CreateUserDto {
@@ -34,8 +40,6 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsIn([Math.random()], { message: 'Password does not match!' })
-  @ValidateIf(o => o.password !== o.confirmPassword)
   confirmPassword: string;
 
   @ApiProperty({
@@ -43,8 +47,8 @@ export class CreateUserDto {
     description: 'Phone number of the user, max 11 characters',
   })
   @IsString()
+  @IsPhoneNumber()
   @IsNotEmpty()
-  @MaxLength(11)
   phone: string;
 
   @ApiProperty({
@@ -54,6 +58,6 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsIn([Gender.MALE, Gender.FEMALE])
+  @IsEnum(Gender)
   Gender: Gender.MALE | Gender.FEMALE;
 }

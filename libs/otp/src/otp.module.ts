@@ -1,19 +1,13 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { OtpRepository } from './repositories/otp.repository';
 import { OtpService } from './otp.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Otp } from './entities/otp.entity';
 
 @Global()
 @Module({
-  imports: [
-  ],
-  providers: [
-    OtpRepository,
-    OtpService
-  ],
-  exports: [
-    OtpRepository,
-    OtpService
-  ],
+  imports: [TypeOrmModule.forFeature([Otp])],
+  providers: [OtpRepository, OtpService],
+  exports: [OtpService],
 })
 export class OtpModule {}

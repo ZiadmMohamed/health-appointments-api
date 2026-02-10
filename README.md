@@ -383,6 +383,7 @@ npm run migration:cli
 ```
 
 This will prompt you to:
+
 1. **Select application** (`app` or `admin`)
 2. **Choose migration action**:
    - Run pending migrations
@@ -425,7 +426,6 @@ npm run migration:cli create --app admin --name UpdatePermissions
 
 Define your TypeORM entities in the appropriate library
 
-
 #### 2. Generate Migration
 
 Generate a migration based on entity changes:
@@ -435,12 +435,12 @@ npm run migration:cli generate --app app --name CreateUsersTable
 ```
 
 This will:
+
 - Compare current entities with database schema
 - Generate SQL queries to update the schema
 - Create a timestamped migration file in `apps/app/src/database/migrations/`
 
 #### 3. Review Generated Migration
-
 
 #### 4. Run Migration
 
@@ -451,6 +451,7 @@ npm run migration:cli run --app app
 ```
 
 Output:
+
 ```
 ============================================================
 Running migration: run for app
@@ -567,8 +568,8 @@ export default new DataSource({
   database: dbConfig.database,
   entities: [join(__dirname, '../**/entities/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
-  migrationsTableName: 'app_migrations',  // Separate migration history
-  synchronize: false,  // Never use synchronize: true in production
+  migrationsTableName: 'app_migrations', // Separate migration history
+  synchronize: false, // Never use synchronize: true in production
   logging: dbConfig.logging,
 });
 ```
@@ -578,6 +579,7 @@ export default new DataSource({
 #### Issue: Migration generation fails with "No changes in database schema were found"
 
 **Solution**: Ensure your entities are:
+
 1. Properly decorated with TypeORM decorators
 2. Registered in the application module
 3. Included in the `entities` path in `ormconfig.ts`
@@ -968,6 +970,24 @@ const appConfig = configService.get<AppConfig>('app');
 // Set global API prefix
 app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
 ```
+
+### Husky Pre-commit
+
+You need to use this commit format:
+type: subject
+Like:
+
+```bash
+git commit -m "chore: test commit"
+```
+
+Valid types from husky config: feat, fix, docs, style, refactor, test, chore, revert
+Examples:
+
+feat: add new feature
+fix: resolve bug in login
+docs: update README
+test: add unit tests
 
 ## Additional Resources
 
