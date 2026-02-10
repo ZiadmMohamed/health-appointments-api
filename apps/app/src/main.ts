@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { IAppConfig } from './config/app.config';
+import { ValidationPipe } from '@nestjs/common';
+import { ErrorHandlingInterceptor } from '@app/common/interceptor/error-handler.interceptor';
+import { ResponseTransformInterceptor } from '@app/common/interceptor/success-handler.interceptor';
 import { SwaggerModule } from '@nestjs/swagger';
 import { appSwaggerConfig, setSwaggerConfig } from '@app/common/swagger';
 
@@ -12,6 +15,19 @@ async function bootstrap() {
   const appConfig = configService.get<IAppConfig>('app');
 
   app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.useGlobalInterceptors(
+    new ErrorHandlingInterceptor(),
+    new ResponseTransformInterceptor(),
+  );
 
   // Swagger setup
   if (appConfig?.env !== 'production') {
