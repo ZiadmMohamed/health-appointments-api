@@ -1,10 +1,7 @@
-import { SetMetadata } from "@nestjs/common";
-import { AppAbility } from "./casl-ability.factory";
-export interface IPolicyHandler{
-    handle(ability:AppAbility):boolean
-}
- export const CheckPoliciesKey='check_policies';
-type PolicyHandlerCallback=(ability:AppAbility)=>boolean;
-export type PolicyHandler=IPolicyHandler | PolicyHandlerCallback;
-export const CheckPolicies=(...handlers: PolicyHandler[])=>SetMetadata(CheckPoliciesKey, handlers);
+import { SetMetadata } from '@nestjs/common';
+import { action, Subjects } from './types';
 
+// @CheckAbility(Action.Read, User)
+export const check_ablility = 'check_ability';
+export const CheckAbility = (action: action, Subject: Subjects) =>
+  SetMetadata(check_ablility, { action, Subject });
