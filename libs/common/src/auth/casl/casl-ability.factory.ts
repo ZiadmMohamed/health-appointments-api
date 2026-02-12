@@ -1,37 +1,20 @@
-import { AbilityBuilder, createMongoAbility, ExtractSubjectType, InferSubjects,MongoAbility} from '@casl/ability';
-import {Injectable} from "@nestjs/common"
-export enum action{
-    Manage = 'manage',  
-    Create = 'create',
-    Read = 'read',
-    Update = 'update',
-    Delete = 'delete',  
-}
-export enum role{
-    Admin='admin',
-    Doctor='doctor',
-    Patient='patient',
-}
-//  import { User } from '../users/entities/user.entity';
-// like infraSubjects <typeof userEntity | typeof patienEntity>
-export type Subjects = InferSubjects<any> | 'all';
-export type AppAbility=MongoAbility<[action,Subjects]>
+import { Injectable } from '@nestjs/common';
+import { AdminAbilityFactory } from './admin-ability.factory';
+import { AppAbility, role } from './types';
+import { PatientAbilityFactory, UserPayload } from './patient-ability.factory';
 @Injectable()
-export class CaslAbilityFactory{
-    // import User type from user entity
-    // user:User
-    createForUser(user:any){
-        const{can,cannot,build}=new AbilityBuilder<AppAbility>(createMongoAbility)
-    if(user.role===role.Admin){
-        can(action.Manage,'all')
-    }else{
-        can(action.Read,'all')
-        // here you can add more specific rules for Doctor and Patient roles
-        // example: can(action.Update,'Appointment',{doctorId:user.id}),cannot(action.Delete,'User').because('You cannot delete users only admins can   ')
-
+export class CaslAbilityFactory {
+  constructor(
+    private adminAbilityFactory: AdminAbilityFactory,
+    private patientAbilityFactory: PatientAbilityFactory,
+  ) {}
+  //  user:UserEntity temprarly use interface
+  createForUser(user: UserPayload): AppAbility {
+    if (user.role === role.Admin) {
+      return this.adminAbilityFactory.createForUser(user);
+    } else if (user.role === role.Patient) {
+      return this.patientAbilityFactory.createForUser(user);
     }
-    return build({detectSubjectType:item=>item.constructor as ExtractSubjectType<Subjects>
-    })  
-}
-
+    return this.patientAbilityFactory.createForUser(user);
+  }
 }

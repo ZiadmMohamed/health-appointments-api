@@ -4,7 +4,6 @@ import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { CustomTypeORMLogger } from './typeorm.logger';
 import { IDatabaseConfig } from '@app/core/config/database.config';
-import { BaseArticleEntity } from '@app/article/entity/article.entity';
 
 @Injectable()
 export class DatabaseService implements TypeOrmOptionsFactory {
@@ -25,7 +24,6 @@ export class DatabaseService implements TypeOrmOptionsFactory {
       namingStrategy: new SnakeNamingStrategy(),
       autoLoadEntities: true,
       migrationsRun: dbConfig?.isProduction,
-      entities: [BaseArticleEntity],
       migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     };
   }
