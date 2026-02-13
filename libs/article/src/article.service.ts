@@ -9,4 +9,7 @@ export class ArticleService {
     @InjectRepository(ArticleEntity)
     private readonly articleRepo: Repository<ArticleEntity>,
   ) {}
+  async findAll() {
+    return await this.articleRepo.find();
+  }
 }

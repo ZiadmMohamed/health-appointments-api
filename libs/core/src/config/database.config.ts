@@ -18,8 +18,8 @@ class DatabaseConfig extends CommonConfig {
   load(): IDatabaseConfig {
     return {
       type: 'postgres',
-      host: this.getEnvString('DATABASE_HOST'),
-      port: this.getEnvNumber('DATABASE_PORT'),
+      host: this.getEnvString('DB_HOST'),
+      port: this.getEnvNumber('DB_PORT'),
       username: this.getEnvString('DB_USERNAME'),
       password: this.getEnvString('DB_PASSWORD'),
       database: this.getEnvString('DB_NAME', 'health_appointments'),

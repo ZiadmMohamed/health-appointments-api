@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import { execSync } from 'child_process';
-import { join } from 'path';
+
 
 // Define available apps and migration actions
 // TODO: get them with redirSync methode
@@ -36,64 +36,48 @@ function log(message: string, color?: keyof typeof colors) {
 }
 
 function getOrmConfigPath(app: AppType): string {
-  return join(__dirname, `apps/${app}/src/config/ormconfig.ts`);
+  // return join(__dirname, `apps/${app}/src/config/ormconfig.ts`);
+  return `apps/${app}/src/config/ormconfig.ts`;
 }
 
 function getMigrationsDir(app: AppType): string {
   return `apps/${app}/src/database/migrations`;
 }
-
-function executeMigrationCommand(
-  app: AppType,
-  action: MigrationAction,
-  migrationName?: string,
-) {
-  const ormConfigPath = getOrmConfigPath(app);
-
-  log(`\n${'='.repeat(60)}`, 'cyan');
-  log(`Running migration: ${action} for ${app}`, 'bright');
-  log(`${'='.repeat(60)}\n`, 'cyan');
+function executeMigrationCommand(app: AppType, action: MigrationAction, migrationName?: string) {
+ 
+  const ormConfigPath = `./apps/${app}/src/config/ormconfig.ts`;
+  
+  console.log(`\n============================================================`);
+  console.log(`Running migration: ${action} for ${app}`);
+  console.log(`============================================================\n`);
 
   let command = '';
+  const configArg = `-d "${ormConfigPath}"`;
 
   switch (action) {
     case 'run':
-      command = `npm run typeorm -- migration:run -d ${ormConfigPath}`;
+      command = `npm run typeorm -- migration:run ${configArg}`;
       break;
     case 'revert':
-      command = `npm run typeorm -- migration:revert -d ${ormConfigPath}`;
+      command = `npm run typeorm -- migration:revert ${configArg}`;
       break;
     case 'show':
-      command = `npm run typeorm -- migration:show -d ${ormConfigPath}`;
+      command = `npm run typeorm -- migration:show ${configArg}`;
       break;
     case 'generate': {
-      if (!migrationName) {
-        log('Migration name is required for generate action', 'red');
-        process.exit(1);
-      }
-      const generatePath = join(getMigrationsDir(app), migrationName);
-      command = `npm run typeorm -- migration:generate ${generatePath} -d ${ormConfigPath}`;
-      break;
-    }
-    case 'create': {
-      if (!migrationName) {
-        log('Migration name is required for create action', 'red');
-        process.exit(1);
-      }
-      const createPath = join(getMigrationsDir(app), migrationName);
-      command = `npm run typeorm -- migration:create ${createPath}`;
+      const genPath = `./apps/${app}/src/migrations/${migrationName || 'migration'}`;
+      command = `npm run typeorm -- migration:generate "${genPath}" ${configArg}`;
       break;
     }
   }
 
-  log(`Executing: ${command}\n`, 'blue');
+  console.log(`Executing: ${command}\n`);
 
   try {
-    execSync(command, { stdio: 'inherit', cwd: __dirname });
-    log(`\n✓ Migration ${action} completed successfully!`, 'green');
-  } catch {
-    log(`\n✗ Migration ${action} failed!`, 'red');
-    process.exit(1);
+     execSync(command, { stdio: 'inherit' });                   
+    console.log(`\n✓ Migration ${action} completed successfully!`);
+  } catch (error) {
+    console.error(`\n✗ Migration ${action} failed!`);
   }
 }
 

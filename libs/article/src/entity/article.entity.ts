@@ -9,4 +9,6 @@ export class ArticleEntity {
   content: string;
   @Column({ default: 'draft' })
   status: string;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 }

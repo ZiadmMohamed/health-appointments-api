@@ -1,18 +1,21 @@
-import DataBaseSeed from '@app/database/seeders/seed';
-import { join } from 'node:path';
+// import DataBaseSeed from '@app/database/seeders/seed';
+import DataBaseSeed from '../../../../libs/database/src/seeders/seed';
+import { join, resolve } from 'node:path';
 import { SeederOptions } from 'node_modules/typeorm-extension/dist/seeder/type';
 import { config } from 'dotenv';
 
 // Load environment variables for CLI usage
-const ENV = process.env.NODE_ENV;
+const ENV = process.env.NODE_ENV || 'development';
+const envFile = !ENV ? '.env' : `.env.${ENV}`;
 config({
-  path: !ENV ? '.env' : `.env.${ENV}`,
+  path: resolve(process.cwd(), envFile),
   debug: true,
 });
 
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import databaseConfig from '@app/core/config/database.config';
+// import databaseConfig from '@app/core/config/database.config';
+import databaseConfig from '../../../../libs/core/src/config/database.config';
 
 const dbConfig = databaseConfig();
 
@@ -22,7 +25,7 @@ console.log('This CLI operation was done on: ', {
   databaseHost: dbConfig.host,
 });
 
-export default new DataSource({
+export const connectionSource = new DataSource({
   type: dbConfig.type,
   host: dbConfig.host,
   port: dbConfig.port,
