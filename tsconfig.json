@@ -35,7 +35,9 @@
       "@app/database": ["libs/database/src"],
       "@app/database/*": ["libs/database/src/*"],
       "@app/user": ["libs/user/src"],
-      "@app/user/*": ["libs/user/src/*"]
+      "@app/user/*": ["libs/user/src/*"],
+      "@pp/ask": ["libs/ask/src"],
+      "@pp/ask/*": ["libs/ask/src/*"]
     }
   }
 }
