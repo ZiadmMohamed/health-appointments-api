@@ -25,6 +25,6 @@ export class ResetPasswordDto {
   @IsString()
   @IsNotEmpty()
   @IsIn([Math.random()], { message: 'Password does not match!' })
-  @ValidateIf(o => o.newPassword !== o.confirmPassword)
+  @ValidateIf((o:ResetPasswordDto) => o.newPassword !== o.confirmPassword)
   confirmPassword: string;
 }
