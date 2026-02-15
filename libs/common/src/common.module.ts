@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { CommonService } from './common.service';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  providers: [CommonService],
-  exports: [CommonService],
+  imports: [],
+  providers: [
+    CommonService, 
+  ],
+  exports: [
+    CommonService, 
+  ],
 })
 export class CommonModule {}
