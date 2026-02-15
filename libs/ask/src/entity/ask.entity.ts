@@ -20,8 +20,8 @@ export class Ask {
   @Column({ type: 'text' })
   question: string;
 
-  //   @Column({ nullable: true })
-  //   patientId: number;
+  @Column({ nullable: true })
+  patientId: number;
 
   @Column({ default: AskStatus.PENDING })
   status: AskStatus;
