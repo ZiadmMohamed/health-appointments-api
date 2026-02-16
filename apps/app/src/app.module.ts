@@ -6,6 +6,7 @@ import { CoreModule } from '@app/core';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from '../../../libs/core/src/validation/env.validation';
 import appConfig from './config/app.config';
+import { AskModule } from '@pp/ask';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import appConfig from './config/app.config';
       validate,
       cache: true,
     }),
+    AskModule,
   ],
   controllers: [AppController],
   providers: [AppService],
