@@ -1,4 +1,5 @@
-import { MongoAbility } from '@casl/ability';
+import { InferSubjects, MongoAbility } from '@casl/ability';
+import { Ask } from '@pp/ask/entity/ask.entity';
 
 export enum action {
   Manage = 'manage',
@@ -14,5 +15,5 @@ export enum role {
 }
 //  import { User } from '../users/entities/user.entity';
 // like infraSubjects <typeof userEntity | typeof patienEntity>
-export type Subjects = 'all';
+export type Subjects = InferSubjects<typeof Ask> | 'all';
 export type AppAbility = MongoAbility<[action, Subjects]>;

@@ -7,9 +7,10 @@ import { ConfigModule } from '@nestjs/config';
 import { validate } from '../../../libs/core/src/validation/env.validation';
 import appConfig from './config/app.config';
 import { AskModule } from '@pp/ask';
+import { CaslModule } from '@app/common/auth/casl/casl.module';
 
 @Module({
-  imports: [
+  imports: [CaslModule,
     DatabaseModule,
     CoreModule,
     ConfigModule.forRoot({

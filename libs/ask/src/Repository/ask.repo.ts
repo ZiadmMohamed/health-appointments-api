@@ -40,4 +40,10 @@ export class AskRepository {
     }
     return result;
   }
+  async findByPatientId(patientId: number): Promise<Ask[]> {
+    return await this.askRepo.find({
+      where: { patientId: patientId  }, 
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
