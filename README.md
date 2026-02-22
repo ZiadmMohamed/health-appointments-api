@@ -972,12 +972,15 @@ app.setGlobalPrefix(`${appConfig?.apiPrefix}/${appConfig?.apiVersion}`);
 ```
 
 ### Husky Pre-commit
+
 You need to use this commit format:
 type: subject
 Like:
+
 ```bash
 git commit -m "chore: test commit"
 ```
+
 Valid types from husky config: feat, fix, docs, style, refactor, test, chore, revert
 Examples:
 
