@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity('articles')
 export class ArticleEntity {
   @PrimaryGeneratedColumn()
@@ -9,6 +9,6 @@ export class ArticleEntity {
   content: string;
   @Column({ default: 'draft' })
   status: string;
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+@CreateDateColumn()
   createdAt: Date;
 }
