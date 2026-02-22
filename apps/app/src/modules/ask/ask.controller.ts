@@ -30,7 +30,7 @@ export class AskController {
   @UseGuards(CaslGuard)
   @CheckAbility(action.Read, Ask) 
   @ApiOperation({ summary: 'Get my own Ask forms' })
-  async findOwn(@Request() req) {
+  async findOwn(@Request() req): Promise<Ask[]> {
     return await this.askService.findMyAsks(req.user.id);
   }
 
