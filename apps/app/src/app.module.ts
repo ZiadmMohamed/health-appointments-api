@@ -7,6 +7,7 @@ import { AppAuthModule } from './modules/auth/app-auth.module';
 import { EmailModule } from 'libs/email/src';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
+import { AskModule } from '@pp/ask';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import appConfig from './config/app.config';
       load: [appConfig],
       cache: true,
     }),
+    AskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

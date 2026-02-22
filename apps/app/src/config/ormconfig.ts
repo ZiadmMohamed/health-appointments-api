@@ -35,7 +35,10 @@ export const connectionSource = new DataSource({
   synchronize: false,
   logging: dbConfig.logging,
   namingStrategy: new SnakeNamingStrategy(),
-  entities: [join(__dirname, '../**/entities/*.entity{.ts,.js}')],
+  entities: [
+    join(process.cwd(), 'apps/**/*.entity{.ts,.js}'),
+    join(process.cwd(), 'libs/**/*.entity{.ts,.js}'),
+  ],
   migrations: [join(__dirname, '../database/migrations/*{.ts,.js}')],
   migrationsTableName: 'app_migrations',
   migrationsRun: dbConfig.isProduction,

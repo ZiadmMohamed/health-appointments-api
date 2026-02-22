@@ -37,6 +37,15 @@
         "tsConfigPath": "libs/article/tsconfig.lib.json"
       }
     },
+    "ask": {
+      "type": "library",
+      "root": "libs/ask",
+      "entryFile": "index",
+      "sourceRoot": "libs/ask/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/ask/tsconfig.lib.json"
+      }
+    },
     "auth": {
       "type": "library",
       "root": "libs/auth",
