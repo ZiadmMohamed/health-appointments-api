@@ -1,3 +1,4 @@
+import { Environment } from '@app/common/enums/env.enum';
 import { plainToInstance, Type } from 'class-transformer';
 import {
   IsEnum,
@@ -7,7 +8,6 @@ import {
   IsBoolean,
   IsOptional,
 } from 'class-validator';
-import { Environment } from './enums/env.enum';
 
 export class EnvironmentVariables {
   // Application Environment Config

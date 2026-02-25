@@ -1,4 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+export enum articleStatus{
+    DRAFT = 'draft',
+    PUBLISHED = 'published',
+    ARCHIVED = 'archived'
+}
 @Entity('articles')
 export class ArticleEntity {
   @PrimaryGeneratedColumn()
@@ -7,8 +12,8 @@ export class ArticleEntity {
   title: string;
   @Column()
   content: string;
-  @Column({ default: 'draft' })
-  status: string;
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: articleStatus.DRAFT })
+  status?: articleStatus;
+@CreateDateColumn()
   createdAt: Date;
 }
