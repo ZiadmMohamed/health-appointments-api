@@ -8,9 +8,10 @@ import { EmailModule } from 'libs/email/src';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
 import { AskModule } from '@pp/ask';
+import { CaslModule } from '@app/common/auth/casl/casl.module';
 
 @Module({
-  imports: [
+  imports: [CaslModule,
     DatabaseModule,
     CoreModule,
     AppAuthModule,

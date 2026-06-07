@@ -1,3 +1,4 @@
 export * from './ask.module';
-export * from './ask.service';
+export * from './service/ask.service';
 export * from './Repository/ask.repo';
+export * from './entity/ask.entity';
